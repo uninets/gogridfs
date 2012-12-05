@@ -69,6 +69,11 @@ func getFile (path string) (file bytes.Buffer, err error) {
         if err != nil { break }
     }
 
+    // non EOF error are to be handled
+    if err != io.EOF {
+        return
+    }
+
     // close gridfile
     err = gfsFile.Close()
     if err != nil {
