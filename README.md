@@ -36,6 +36,12 @@ The module is configured with a JSON file. An example may look like this:
                                  // it will be cut from the file name so requests to
                                  // /gofiles/some/path/file.png will serve
                                  // some/path/file.png from GridFS
+    "mode": "strong"             // mgo mode of querying
+                                 // strong    => safe, reads and writes on master only
+                                 // monotonic => faster, distribution of queries across nodes
+                                 //              no guaranteed consistency between queries
+                                 // eventual  => fastest, no guaranteed consistency at all
+                                 // default node is striong
     "debug": true                // log requested file paths
 }
 ```

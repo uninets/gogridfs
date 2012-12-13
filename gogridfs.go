@@ -11,6 +11,7 @@ import (
     "flag"
     "log"
     "os"
+    "strings"
 )
 
 // file path and content
@@ -36,6 +37,7 @@ type config struct {
     Listen string
     HandlePath string
     Debug bool
+    Mode string
 }
 
 // load config from json file
@@ -141,6 +143,20 @@ func main() {
         servers += (server + ",")
     }
 
+    // determine mode
+    // Strong (safe) => 2
+    // Monotonic (fast) => 1
+    // Eventual (faster) => 0
+    // default => 2
+    mode := mgo.Strong
+    if strings.ToLower(ggfs.Conf.Mode) == "monotonic" {
+        ggfs.Logger.Println("mgo connection mode: monotonic")
+        mode = mgo.Monotonic
+    } else if strings.ToLower(ggfs.Conf.Mode) == "eventual" {
+        ggfs.Logger.Println("mgo connection mode: eventual")
+        mode = mgo.Eventual
+    }
+
     // die if no servers are configured
     if servers == "" {
         ggfs.Logger.Fatalln("No mongodb servers. Please adjust your config file.")
@@ -148,6 +164,7 @@ func main() {
 
     // connect to mongodb
     mgo_session, err := mgo.Dial(servers)
+    mgo_session.SetMode(mode, true)
     if err != nil {
         ggfs.Logger.Fatalln(err)
     }
